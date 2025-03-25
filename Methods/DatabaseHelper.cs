@@ -5,7 +5,7 @@ namespace TryToDo_Api.Methods;
 
 public static class DatabaseHelper
 {
-    public static void AddCategory(string categoryName, string categoryColor, int categoryUserId)
+    public static void AddCategory(string categoryName, string categoryColor, string categoryUserId)
     {
         using (var context = new DatabaseContext())
         {
@@ -13,7 +13,7 @@ public static class DatabaseHelper
             {
                 Name = categoryName,
                 Color = categoryColor,
-                UserId = categoryUserId
+                UserGuid = categoryUserId
             };
 
             context.Categories.Add(category);
@@ -21,7 +21,7 @@ public static class DatabaseHelper
         }
     }
 
-    public static void AddItem(string itemName, int itemUserId, string? itemDescription = null, int? categoryId = null, int? itemAprxHours = null, DateTime? itemEndedAt = null, bool? itemIsLooped = false, int? itemPriority = null)
+    public static void AddItem(string itemName, string itemUserId, string? itemDescription = null, int? categoryId = null, int? itemAprxHours = null, DateTime? itemEndedAt = null, bool? itemIsLooped = false, int? itemPriority = null)
     {
         using (var context = new DatabaseContext())
         {
@@ -34,7 +34,7 @@ public static class DatabaseHelper
                 Priority = itemPriority,
                 CategoryId = categoryId,
                 IsLooped = itemIsLooped,
-                UserId = itemUserId
+                UserGuid = itemUserId
             };
 
             context.Items.Add(item);
@@ -138,19 +138,19 @@ public static class DatabaseHelper
         }
     }
 
-    public static List<Category> GetCategoriesByUserId(int userId)
+    public static List<Category> GetCategoriesByUserId(string userId)
     {
         using (var context = new DatabaseContext())
         {
-            return context.Categories.Where(c => c.UserId == userId).ToList();
+            return context.Categories.Where(c => c.UserGuid == userId).ToList();
         }
     }
 
-    public static List<Item> GetItemsByUserId(int userId)
+    public static List<Item> GetItemsByUserId(string userId)
     {
         using (var context = new DatabaseContext())
         {
-            return context.Items.Where(i => i.UserId == userId).ToList();
+            return context.Items.Where(i => i.UserGuid == userId).ToList();
         }
     }
 }

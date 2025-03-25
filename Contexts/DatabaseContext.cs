@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TryToDo_Api.Classes;
 
 namespace TryToDo_Api.Contexts;
 
-public class DatabaseContext : DbContext
+public class DatabaseContext : IdentityDbContext<AuthUser>
 {
     public DbSet<Item> Items { get; set; }
     public DbSet<Category> Categories { get; set; }
@@ -23,10 +24,14 @@ public class DatabaseContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder); // This line is crucial!
+
         modelBuilder.Entity<Item>()
             .HasOne<Category>()
             .WithMany()
             .HasForeignKey(i => i.CategoryId);
+
+
     }
 }
 
