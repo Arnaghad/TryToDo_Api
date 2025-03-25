@@ -10,5 +10,5 @@ public class Item
     public int? Priority { get; set; }
     public int? CategoryId { get; set; }
     public bool? IsLooped { get; set; }
-    public int UserId { get; set; }
+    public string UserGuid { get; set; }
 }
