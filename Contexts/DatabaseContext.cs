@@ -24,14 +24,12 @@ public class DatabaseContext : IdentityDbContext<AuthUser>
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder); // This line is crucial!
+        base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<Item>()
             .HasOne<Category>()
             .WithMany()
             .HasForeignKey(i => i.CategoryId);
-
-
     }
 }
 
