@@ -153,4 +153,36 @@ public static class DatabaseHelper
             return context.Items.Where(i => i.UserGuid == userId).ToList();
         }
     }
+    
+    public static Item? GetItemById(int id)
+    {
+        using (var context = new DatabaseContext())
+        {
+            return context.Items.FirstOrDefault(i => i.Id == id);
+        }
+    }
+    
+    public static Category? GetCategorybyId(int id)
+    {
+        using (var context = new DatabaseContext())
+        {
+            return context.Categories.FirstOrDefault(c => c.Id == id);
+        }
+    }
+    
+    public static bool ExistsItem(int id)
+    {
+        using (var context = new DatabaseContext())
+        {
+            return context.Items.Any(c => c.Id == id);
+        }
+    }
+    
+    public static bool ExistsCategory(int id)
+    {
+        using (var context = new DatabaseContext())
+        {
+            return context.Categories.Any(c => c.Id == id);
+        }
+    }
 }
