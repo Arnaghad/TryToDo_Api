@@ -15,7 +15,7 @@ public class DatabaseContext : IdentityDbContext<AuthUser>
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        string connectionString = "server=localhost;user=root;password=953292529;database=todo;";
+        string connectionString = "server=mariadb;user=root;password=953292529;database=todo;";
         optionsBuilder.UseMySql(
             connectionString, 
             ServerVersion.AutoDetect(connectionString)
