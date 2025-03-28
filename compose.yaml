@@ -1,0 +1,44 @@
+﻿networks:
+  dev:
+    driver: bridge
+
+services:
+  mariadb:
+    image: mariadb:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 953292529
+      MYSQL_DATABASE: todo
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      start_period: 1m
+      start_interval: 10s
+      interval: 1m
+      timeout: 5s
+      retries: 3
+    networks:
+      - dev
+
+  trytodo_api:
+    image: trytodo_api
+    restart: always
+    ports:
+      - 4000:8080
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - CONNECTION_STRING=server=mariadb;port=3306;user=root;password=953292529;database=todo;
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    networks:
+      - dev
+
+volumes:
+  mariadb_data:
+
