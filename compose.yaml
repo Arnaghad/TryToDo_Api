@@ -1,5 +1,5 @@
 ﻿networks:
-  dev:
+  todo_dev:
     driver: bridge
 
 services:
@@ -21,7 +21,7 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      - dev
+      - todo_dev
 
   trytodo_api:
     image: trytodo_api
@@ -37,7 +37,7 @@ services:
       mariadb:
         condition: service_healthy
     networks:
-      - dev
+      - todo_dev
 
 volumes:
   mariadb_data:
