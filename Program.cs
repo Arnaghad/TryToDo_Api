@@ -44,9 +44,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-DatabaseHelper.AddCategory("Work", "Blue", Guid.NewGuid().ToString());
-DatabaseHelper.AddItem("Complete project", Guid.NewGuid().ToString(), "Finish the report");
-
 app.MapGet("/items", [Authorize] async (HttpContext x, UserManager<AuthUser> userManager) =>
 {
     var user = await userManager.GetUserAsync(x.User);
@@ -55,12 +52,7 @@ app.MapGet("/items", [Authorize] async (HttpContext x, UserManager<AuthUser> use
         return Results.NotFound("User not found");
     }
 
-    if (user.UserId == Guid.Empty)
-    {
-        return Results.NotFound("User doesnt have items");
-    }
-
-    var items = DatabaseHelper.GetItemsByUserId(user.UserId.ToString());
+    var items = DatabaseHelper.GetItemsByUserId(user.Id);
     var json = JsonSerializer.Serialize(items, new JsonSerializerOptions { WriteIndented = true });
     return Results.Ok(json);
 }).WithOpenApi(genOp =>
@@ -79,12 +71,7 @@ app.MapGet("/categories", [Authorize] async (HttpContext x, UserManager<AuthUser
         return Results.NotFound("User not found");
     }
 
-    if (user.UserId == Guid.Empty)
-    {
-        return Results.NotFound("User doesnt have items");
-    }
-
-    var categories = DatabaseHelper.GetCategoriesByUserId(user.UserId.ToString());
+    var categories = DatabaseHelper.GetCategoriesByUserId(user.Id);
     var json = JsonSerializer.Serialize(categories, new JsonSerializerOptions { WriteIndented = true });
     return Results.Ok(json);
 }).WithOpenApi(genOp =>
@@ -107,12 +94,7 @@ app.MapPost("/items/add", [Authorize] async (HttpContext x, UserManager<AuthUser
     var body = await reader.ReadToEndAsync();
     var item = JsonSerializer.Deserialize<Item>(body);
 
-    if (user.UserId == null)
-    {
-        user.UserId = Guid.NewGuid();
-    }
-
-    item.UserGuid = user.UserId.ToString();
+    item.UserGuid = user.Id;
     await userManager.UpdateAsync(user);
     return Results.Ok("Item added");
 }).WithOpenApi(genOp =>
@@ -145,12 +127,7 @@ app.MapPost("/categories/add", [Authorize] async (HttpContext x, UserManager<Aut
     var body = await reader.ReadToEndAsync();
     var category = JsonSerializer.Deserialize<Category>(body);
 
-    if (user.UserId == null)
-    {
-        user.UserId = Guid.NewGuid();
-    }
-
-    category.UserGuid = user.UserId.ToString();
+    category.UserGuid = user.Id;
     await userManager.UpdateAsync(user);
     return Results.Ok("Category added");
 });
