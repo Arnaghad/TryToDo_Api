@@ -240,6 +240,18 @@ app.MapDelete("/categories/delete/{id}", [Authorize] async (HttpContext x, UserM
     return Results.Ok("Category deleted");
 });
 
+app.MapGet("/user", [Authorize] async (HttpContext x, UserManager<AuthUser> userManager) =>
+{
+    var user = await userManager.GetUserAsync(x.User);
+    if (user == null)
+    {
+        return Results.NotFound("User not found");
+    }
+    var json = JsonSerializer.Serialize(user, new JsonSerializerOptions { WriteIndented = true });
+    return Results.Content(json, "application/json");
+})
+.Produces<AuthUser>();
+
 app.UseHttpsRedirection();
 app.MapIdentityApi<AuthUser>();
 app.UseAuthorization();
