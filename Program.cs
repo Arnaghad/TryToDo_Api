@@ -95,6 +95,7 @@ app.MapPost("/items/add", [Authorize] async (HttpContext x, UserManager<AuthUser
     var item = JsonSerializer.Deserialize<Item>(body);
 
     // Після item.UserGuid = user.Id;
+    item.UserGuid = user.Id;
     try
     {
         DatabaseHelper.AddItem(
@@ -117,8 +118,6 @@ app.MapPost("/items/add", [Authorize] async (HttpContext x, UserManager<AuthUser
     }
     // Приберіть рядок await userManager.UpdateAsync(user); якщо він там є
 
-    item.UserGuid = user.Id;
-    await userManager.UpdateAsync(user);
     return Results.Ok("Item added");
 }).WithOpenApi(genOp =>
 {
