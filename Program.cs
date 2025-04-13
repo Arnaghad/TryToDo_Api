@@ -140,19 +140,61 @@ app.MapPost("/items/add", [Authorize] async (HttpContext x, UserManager<AuthUser
 
 app.MapPost("/categories/add", [Authorize] async (HttpContext x, UserManager<AuthUser> userManager) =>
 {
+     // 1. Отримуємо авторизованого користувача
     var user = await userManager.GetUserAsync(x.User);
     if (user == null)
     {
+        // Якщо користувач не знайдений (малоймовірно при [Authorize]), повертаємо помилку
         return Results.NotFound("User not found");
     }
 
+    // 2. Читаємо тіло запиту (JSON з даними категорії)
     using var reader = new StreamReader(x.Request.Body);
     var body = await reader.ReadToEndAsync();
-    var category = JsonSerializer.Deserialize<Category>(body);
+    Category? category = null; // Використовуємо Category? для можливості null
+    try
+    {
+        category = JsonSerializer.Deserialize<Category>(body); // Десеріалізуємо JSON
+    }
+    catch (JsonException jsonEx)
+    {
+        Console.WriteLine($"Error deserializing category: {jsonEx.Message}");
+        return Results.BadRequest($"Invalid JSON format for category: {jsonEx.Message}");
+    }
 
-    category.UserGuid = user.Id;
-    await userManager.UpdateAsync(user);
-    return Results.Ok("Category added");
+    // Перевіряємо, чи вдалося розібрати JSON і чи є назва
+    if (category == null || string.IsNullOrWhiteSpace(category.Name))
+    {
+        return Results.BadRequest("Category data is invalid or missing 'Name'.");
+    }
+
+    // 3. Встановлюємо ID користувача для категорії
+    // UserGuid встановлюється АВТОМАТИЧНО з токена! Не потрібно його передавати в JSON.
+    // Ми беремо його з об'єкта user.
+    string userId = user.Id;
+
+    // 4. ВИКЛИКАЄМО МЕТОД ЗБЕРЕЖЕННЯ В БАЗУ ДАНИХ
+    try
+    {
+        // Переконуємось, що колір не null (можна встановити за замовчуванням)
+        string color = string.IsNullOrWhiteSpace(category.Color) ? "black" : category.Color;
+
+        DatabaseHelper.AddCategory(category.Name, color, userId); // Передаємо дані у ваш метод
+
+        Console.WriteLine($"Category '{category.Name}' added for user '{userId}'."); // Логування на сервері
+
+        // Успіх! Стандартна відповідь для POST - 201 Created
+        // В ідеалі, тут можна повернути створений об'єкт або шлях до нього,
+        // але для простоти повернемо Ok або Created.
+        // return Results.Created($"/categories/{newly_created_id}", category); // Потрібно отримати ID
+        return Results.Ok("Category added successfully."); // Повертаємо простий успіх 200 OK
+    }
+    catch (Exception ex) // Обробка можливих помилок бази даних
+    {
+        Console.WriteLine($"Error saving category '{category.Name}' to database: {ex.Message}");
+        // Повертаємо загальну помилку сервера
+        return Results.Problem($"An error occurred while saving the category.", statusCode: 500);
+    }
 });
 
 app.MapPut("/categories/update", [Authorize] async (HttpContext x, UserManager<AuthUser> userManager) =>
