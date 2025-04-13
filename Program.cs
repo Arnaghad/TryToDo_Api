@@ -54,7 +54,7 @@ app.MapGet("/items", [Authorize] async (HttpContext x, UserManager<AuthUser> use
 
     var items = DatabaseHelper.GetItemsByUserId(user.Id);
     var json = JsonSerializer.Serialize(items, new JsonSerializerOptions { WriteIndented = true });
-    return Results.Ok(json);
+    return Results.Content(json, "application/json");
 }).WithOpenApi(genOp =>
 {
     genOp.Description = "Повертає всі завдання користувача, котрі були ним раніше створені";
@@ -73,7 +73,7 @@ app.MapGet("/categories", [Authorize] async (HttpContext x, UserManager<AuthUser
 
     var categories = DatabaseHelper.GetCategoriesByUserId(user.Id);
     var json = JsonSerializer.Serialize(categories, new JsonSerializerOptions { WriteIndented = true });
-    return Results.Ok(json);
+    return Results.Content(json, "application/json");
 }).WithOpenApi(genOp =>
 {
     genOp.Description = "Повертає всі категорії користувача, котрі були ним раніше створені";
