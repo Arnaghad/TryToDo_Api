@@ -94,6 +94,29 @@ app.MapPost("/items/add", [Authorize] async (HttpContext x, UserManager<AuthUser
     var body = await reader.ReadToEndAsync();
     var item = JsonSerializer.Deserialize<Item>(body);
 
+    // Після item.UserGuid = user.Id;
+    try
+    {
+        DatabaseHelper.AddItem(
+            item.Name,
+            item.UserGuid,
+            item.Description,
+            item.CategoryId, // УВАГА: Це випадкове число з клієнта!
+            item.AprxHours,
+            item.EndedAt,
+            item.IsLooped,
+            item.Priority
+        );
+    }
+    catch (Exception ex)
+    {
+         // Базова обробка помилок бази даних (особливо ForeignKey)
+         Console.WriteLine($"Error adding item: {ex.Message}"); // Логування помилки на сервері
+         // Повертаємо помилку клієнту
+         return Results.Problem($"Internal server error while adding item: {ex.InnerException?.Message ?? ex.Message}", statusCode: 500);
+    }
+    // Приберіть рядок await userManager.UpdateAsync(user); якщо він там є
+
     item.UserGuid = user.Id;
     await userManager.UpdateAsync(user);
     return Results.Ok("Item added");
