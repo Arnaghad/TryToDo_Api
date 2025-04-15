@@ -241,15 +241,13 @@ app.MapPut("/items/update", [Authorize] async (HttpContext x, UserManager<AuthUs
     return Results.Ok("Item updated");
 });
 
-app.MapDelete("/items/delete/{id}", [Authorize] async (HttpContext x, UserManager<AuthUser> userManager) =>
+app.MapDelete("/items/delete/{id}", [Authorize] async (int id, HttpContext x, UserManager<AuthUser> userManager) => // <-- Додали параметр 'int id'
 {
     var user = await userManager.GetUserAsync(x.User);
     if (user == null)
     {
         return Results.NotFound("User not found");
     }
-    
-    var id = int.Parse(x.Request.Query["id"]);
 
     if (!DatabaseHelper.ExistsItem(id))
     {
